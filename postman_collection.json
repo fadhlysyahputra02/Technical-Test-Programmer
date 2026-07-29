@@ -1,0 +1,1064 @@
+{
+  "info": {
+    "_postman_id": "d5bb600c-ac7e-40d9-9ac2-9b89f0c8cc25",
+    "name": "LionStyle Document Approval System API",
+    "description": "Dokumentasi API lengkap untuk sistem persetujuan dokumen pemohon (Applicant) dan penilai (Reviewer) menggunakan Laravel Sanctum.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "your_sanctum_token_here",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Endpoint untuk registrasi, login, logout, dan mengambil profil aktif.",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "register"
+              ]
+            },
+            "description": "Mendaftarkan user baru dengan role default 'applicant'."
+          },
+          "response": [
+            {
+              "name": "Success Register",
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Registrasi berhasil.\",\n  \"data\": {\n    \"id\": 3,\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"email_verified_at\": null,\n    \"roles\": [\n      \"applicant\"\n    ],\n    \"permissions\": [\n      \"create-project\",\n      \"edit-project\",\n      \"create-application\",\n      \"edit-application\",\n      \"submit-application\",\n      \"upload-document\",\n      \"view-own-application\"\n    ],\n    \"created_at\": \"2026-07-29T14:15:00.000000Z\"\n  },\n  \"token\": \"3|abcdefghijklmnopqrstuvwxyz\"\n}"
+            },
+            {
+              "name": "Validation Error",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"The email has already been taken.\",\n  \"errors\": {\n    \"email\": [\n      \"Email sudah terdaftar.\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "description": "Autentikasi kredensial user untuk mendapatkan token Sanctum."
+          },
+          "response": [
+            {
+              "name": "Success Login",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Login berhasil.\",\n  \"data\": {\n    \"id\": 3,\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"email_verified_at\": null,\n    \"roles\": [\n      \"applicant\"\n    ],\n    \"permissions\": [\n      \"create-project\",\n      \"edit-project\",\n      \"create-application\",\n      \"edit-application\",\n      \"submit-application\",\n      \"upload-document\",\n      \"view-own-application\"\n    ],\n    \"created_at\": \"2026-07-29T14:15:00.000000Z\"\n  },\n  \"token\": \"4|zyxwvutsrqponmlkjihgfedcba\"\n}"
+            },
+            {
+              "name": "Unauthorized Access",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Email atau password salah.\",\n  \"errors\": {\n    \"email\": [\n      \"Email atau password salah.\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "logout"
+              ]
+            },
+            "description": "Menghapus token akses aktif milik user."
+          },
+          "response": [
+            {
+              "name": "Success Logout",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Logout berhasil.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Profile (Me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me"
+              ]
+            },
+            "description": "Mendapatkan detail profil user yang sedang login."
+          },
+          "response": [
+            {
+              "name": "Success Me",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"data\": {\n    \"id\": 3,\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"email_verified_at\": null,\n    \"roles\": [\n      \"applicant\"\n    ],\n    \"permissions\": [\n      \"create-project\",\n      \"edit-project\",\n      \"create-application\",\n      \"edit-application\",\n      \"submit-application\",\n      \"upload-document\",\n      \"view-own-application\"\n    ],\n    \"created_at\": \"2026-07-29T14:15:00.000000Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "description": "Endpoint pengelolaan proyek bagi pemohon (applicant).",
+      "item": [
+        {
+          "name": "List Projects",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects?status=active&search=Proyek&page=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active",
+                  "description": "Filter status active/inactive"
+                },
+                {
+                  "key": "search",
+                  "value": "Proyek",
+                  "description": "Cari nama proyek"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Pagination halaman"
+                }
+              ]
+            },
+            "description": "Melihat daftar proyek milik pemohon."
+          },
+          "response": [
+            {
+              "name": "Success List Projects",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Proyek Penelitian Obat Herbal\",\n      \"description\": \"Deskripsi detail proyek obat herbal.\",\n      \"status\": \"active\",\n      \"applicant_id\": 3,\n      \"applications_count\": 0,\n      \"created_at\": \"2026-07-29T14:20:00.000000Z\",\n      \"updated_at\": \"2026-07-29T14:20:00.000000Z\"\n    }\n  ],\n  \"links\": {\n    \"first\": \"http://localhost:8000/api/projects?page=1\",\n    \"last\": \"http://localhost:8000/api/projects?page=1\",\n    \"prev\": null,\n    \"next\": null\n  },\n  \"meta\": {\n    \"current_page\": 1,\n    \"from\": 1,\n    \"last_page\": 1,\n    \"path\": \"http://localhost:8000/api/projects\",\n    \"per_page\": 20,\n    \"to\": 1,\n    \"total\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Proyek Pembangunan Lab Kimia\",\n  \"description\": \"Proyek pembangunan lab untuk riset.\",\n  \"status\": \"active\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects"
+              ]
+            },
+            "description": "Membuat proyek baru (Khusus Role Applicant)."
+          },
+          "response": [
+            {
+              "name": "Success Create Project",
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Project berhasil dibuat.\",\n  \"data\": {\n    \"id\": 2,\n    \"name\": \"Proyek Pembangunan Lab Kimia\",\n    \"description\": \"Proyek pembangunan lab untuk riset.\",\n    \"status\": \"active\",\n    \"applicant_id\": 3,\n    \"created_at\": \"2026-07-29T14:22:00.000000Z\",\n    \"updated_at\": \"2026-07-29T14:22:00.000000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Project Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "1"
+              ]
+            },
+            "description": "Mendapatkan detail proyek lengkap dengan jumlah permohonan."
+          },
+          "response": [
+            {
+              "name": "Success Detail",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Proyek Penelitian Obat Herbal\",\n    \"description\": \"Deskripsi detail proyek obat herbal.\",\n    \"status\": \"active\",\n    \"applicant_id\": 3,\n    \"applicant\": {\n      \"id\": 3,\n      \"name\": \"John Doe\"\n    },\n    \"applications_count\": 1,\n    \"created_at\": \"2026-07-29T14:20:00.000000Z\",\n    \"updated_at\": \"2026-07-29T14:20:00.000000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Proyek Riset Obat Tradisional Modern\",\n  \"description\": \"Deskripsi terupdate riset obat.\",\n  \"status\": \"active\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "1"
+              ]
+            },
+            "description": "Mengupdate detail proyek (Hanya pemilik)."
+          },
+          "response": [
+            {
+              "name": "Success Update",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Project berhasil diperbarui.\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Proyek Riset Obat Tradisional Modern\",\n    \"description\": \"Deskripsi terupdate riset obat.\",\n    \"status\": \"active\",\n    \"applicant_id\": 3,\n    \"created_at\": \"2026-07-29T14:20:00.000000Z\",\n    \"updated_at\": \"2026-07-29T14:25:00.000000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "2"
+              ]
+            },
+            "description": "Menghapus proyek. Hanya diperbolehkan jika proyek tidak memiliki permohonan terhubung."
+          },
+          "response": [
+            {
+              "name": "Success Delete",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Project berhasil dihapus.\"\n}"
+            },
+            {
+              "name": "Delete Prohibited",
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"This action is unauthorized.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Applications (Applicant)",
+      "description": "Endpoint pengelolaan permohonan berkas bagi Pemohon (Applicant).",
+      "item": [
+        {
+          "name": "List Applications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications?status=draft&project_id=1&date_from=2026-01-01&date_to=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "draft",
+                  "description": "Filter status permohonan"
+                },
+                {
+                  "key": "project_id",
+                  "value": "1",
+                  "description": "Filter proyek ID"
+                },
+                {
+                  "key": "date_from",
+                  "value": "2026-01-01",
+                  "description": "Tanggal mulai filter"
+                },
+                {
+                  "key": "date_to",
+                  "value": "2026-12-31",
+                  "description": "Tanggal selesai filter"
+                }
+              ]
+            },
+            "description": "Melihat daftar permohonan pengajuan milik pemohon."
+          },
+          "response": [
+            {
+              "name": "Success List",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"application_number\": \"APP-2026-123456\",\n      \"status\": \"draft\",\n      \"status_label\": \"Draft\",\n      \"version\": 1,\n      \"notes\": null,\n      \"submitted_at\": null,\n      \"approved_at\": null,\n      \"rejected_at\": null,\n      \"created_at\": \"2026-07-29T14:30:00.000000Z\",\n      \"updated_at\": \"2026-07-29T14:30:00.000000Z\",\n      \"project\": {\n        \"id\": 1,\n        \"name\": \"Proyek Riset Obat Tradisional Modern\",\n        \"status\": \"active\"\n      }\n    }\n  ],\n  \"links\": {\n    \"first\": \"http://localhost:8000/api/applications?page=1\",\n    \"last\": \"http://localhost:8000/api/applications?page=1\",\n    \"prev\": null,\n    \"next\": null\n  },\n  \"meta\": {\n    \"current_page\": 1,\n    \"last_page\": 1,\n    \"per_page\": 20,\n    \"total\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"project_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications"
+              ]
+            },
+            "description": "Membuat draft permohonan baru dengan status default 'draft'."
+          },
+          "response": [
+            {
+              "name": "Success Create",
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Permohonan berhasil dibuat.\",\n  \"data\": {\n    \"id\": 1,\n    \"application_number\": \"APP-2026-123456\",\n    \"status\": \"draft\",\n    \"status_label\": \"Draft\",\n    \"version\": 1,\n    \"notes\": null,\n    \"submitted_at\": null,\n    \"approved_at\": null,\n    \"rejected_at\": null,\n    \"created_at\": \"2026-07-29T14:30:00.000000Z\",\n    \"updated_at\": \"2026-07-29T14:30:00.000000Z\",\n    \"project\": {\n      \"id\": 1,\n      \"name\": \"Proyek Riset Obat Tradisional Modern\",\n      \"status\": \"active\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Application Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "1"
+              ]
+            },
+            "description": "Melihat detail lengkap permohonan beserta lampiran dokumen, riwayat review, dan status histories."
+          },
+          "response": [
+            {
+              "name": "Success Detail",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"application_number\": \"APP-2026-123456\",\n    \"status\": \"draft\",\n    \"status_label\": \"Draft\",\n    \"version\": 1,\n    \"notes\": \"Ubah catatan permohonan.\",\n    \"submitted_at\": null,\n    \"approved_at\": null,\n    \"rejected_at\": null,\n    \"created_at\": \"2026-07-29T14:30:00.000000Z\",\n    \"updated_at\": \"2026-07-29T14:32:00.000000Z\",\n    \"project\": {\n      \"id\": 1,\n      \"name\": \"Proyek Riset Obat Tradisional Modern\",\n      \"status\": \"active\"\n    },\n    \"applicant\": {\n      \"id\": 3,\n      \"name\": \"John Doe\"\n    },\n    \"latest_reviewer\": null,\n    \"documents\": [\n      {\n        \"id\": 1,\n        \"file_name\": \"sertifikasi.pdf\",\n        \"file_type\": \"application/pdf\",\n        \"file_size\": 2048,\n        \"file_path\": \"documents/1/20260729143110_sertifikasi.pdf\",\n        \"uploaded_by\": 3,\n        \"created_at\": \"2026-07-29T14:31:10.000000Z\"\n      }\n    ],\n    \"reviews\": [],\n    \"status_histories\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Application",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Ubah catatan permohonan.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "1"
+              ]
+            },
+            "description": "Mengupdate catatan (notes) permohonan. Hanya berlaku saat status 'draft' atau 'revision_requested'."
+          },
+          "response": [
+            {
+              "name": "Success Update",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Permohonan berhasil diperbarui.\",\n  \"data\": {\n    \"id\": 1,\n    \"application_number\": \"APP-2026-123456\",\n    \"status\": \"draft\",\n    \"status_label\": \"Draft\",\n    \"version\": 1,\n    \"notes\": \"Ubah catatan permohonan.\",\n    \"submitted_at\": null,\n    \"approved_at\": null,\n    \"rejected_at\": null,\n    \"created_at\": \"2026-07-29T14:30:00.000000Z\",\n    \"updated_at\": \"2026-07-29T14:32:00.000000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/1/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "1",
+                "submit"
+              ]
+            },
+            "description": "Mengajukan permohonan (status 'draft' / 'revision_requested' -> 'submitted'). Wajib memiliki minimal 1 dokumen lampiran."
+          },
+          "response": [
+            {
+              "name": "Success Submit",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Permohonan berhasil diajukan.\",\n  \"data\": {\n    \"id\": 1,\n    \"application_number\": \"APP-2026-123456\",\n    \"status\": \"submitted\",\n    \"status_label\": \"Diajukan\",\n    \"version\": 1,\n    \"notes\": \"Ubah catatan permohonan.\",\n    \"submitted_at\": \"2026-07-29T14:35:00.000000Z\",\n    \"approved_at\": null,\n    \"rejected_at\": null,\n    \"created_at\": \"2026-07-29T14:30:00.000000Z\",\n    \"updated_at\": \"2026-07-29T14:35:00.000000Z\"\n  }\n}"
+            },
+            {
+              "name": "Submit Denied (No Documents)",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Permohonan harus memiliki minimal 1 dokumen sebelum dapat diajukan.\",\n  \"errors\": {\n    \"documents\": [\n      \"Permohonan harus memiliki minimal 1 dokumen sebelum dapat diajukan.\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Upload Document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "File dokumen (.pdf, .doc, .docx, .jpg, .jpeg, .png) max 10MB"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/1/documents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "1",
+                "documents"
+              ]
+            },
+            "description": "Mengunggah lampiran dokumen baru ke draft permohonan."
+          },
+          "response": [
+            {
+              "name": "Success Upload",
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Dokumen berhasil diunggah.\",\n  \"data\": {\n    \"id\": 1,\n    \"application_id\": 1,\n    \"file_name\": \"sertifikasi.pdf\",\n    \"file_type\": \"application/pdf\",\n    \"file_size\": 2048,\n    \"file_size_label\": \"2 KB\",\n    \"download_url\": \"http://localhost:8000/api/documents/1/download\",\n    \"uploaded_by\": {\n      \"id\": 3,\n      \"name\": \"John Doe\"\n    },\n    \"created_at\": \"2026-07-29T14:31:10.000000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Application Documents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/1/documents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "1",
+                "documents"
+              ]
+            },
+            "description": "Melihat daftar semua dokumen yang dilampirkan pada suatu permohonan."
+          },
+          "response": [
+            {
+              "name": "Success List Documents",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"application_id\": 1,\n      \"file_name\": \"sertifikasi.pdf\",\n      \"file_type\": \"application/pdf\",\n      \"file_size\": 2048,\n      \"file_size_label\": \"2 KB\",\n      \"download_url\": \"http://localhost:8000/api/documents/1/download\",\n      \"uploaded_by\": {\n        \"id\": 3,\n        \"name\": \"John Doe\"\n      },\n      \"created_at\": \"2026-07-29T14:31:10.000000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Document",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/1/documents/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "1",
+                "documents",
+                "1"
+              ]
+            },
+            "description": "Menghapus berkas dokumen fisik dan record database. Hanya bisa dilakukan saat status permohonan 'draft' atau 'revision_requested'."
+          },
+          "response": [
+            {
+              "name": "Success Delete Document",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Dokumen berhasil dihapus.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Download Document File",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/documents/1/download",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "1",
+                "download"
+              ]
+            },
+            "description": "Mengunduh file fisik dokumen dengan response stream."
+          },
+          "response": [
+            {
+              "name": "Success File Stream Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "plain",
+              "body": "[Binary File Stream Content]"
+            }
+          ]
+        },
+        {
+          "name": "Get Application Status History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/1/histories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "1",
+                "histories"
+              ]
+            },
+            "description": "Mendapatkan daftar kronologis perubahan status permohonan."
+          },
+          "response": [
+            {
+              "name": "Success Timeline histories",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"from_status\": \"draft\",\n      \"from_label\": \"Draft\",\n      \"to_status\": \"submitted\",\n      \"to_label\": \"Diajukan\",\n      \"notes\": \"Diajukan oleh pemohon.\",\n      \"changed_by\": {\n        \"id\": 3,\n        \"name\": \"John Doe\"\n      },\n      \"created_at\": \"2026-07-29T14:35:00.000000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reviewer",
+      "description": "Endpoint khusus bagi peran penilai (reviewer) untuk memproses evaluasi berkas.",
+      "item": [
+        {
+          "name": "List Incoming Applications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reviewer/applications?status=submitted&page=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reviewer",
+                "applications"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "submitted",
+                  "description": "Filter status permohonan masuk"
+                },
+                {
+                  "key": "project_id",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "applicant_id",
+                  "value": "3",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Halaman antrean"
+                }
+              ]
+            },
+            "description": "Melihat semua permohonan masuk yang perlu/sedang diproses penilaian."
+          },
+          "response": [
+            {
+              "name": "Success List Queue",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"application_number\": \"APP-2026-123456\",\n      \"status\": \"submitted\",\n      \"status_label\": \"Diajukan\",\n      \"version\": 1,\n      \"notes\": \"Ubah catatan permohonan.\",\n      \"submitted_at\": \"2026-07-29T14:35:00.000000Z\",\n      \"approved_at\": null,\n      \"rejected_at\": null,\n      \"created_at\": \"2026-07-29T14:30:00.000000Z\",\n      \"updated_at\": \"2026-07-29T14:35:00.000000Z\",\n      \"project\": {\n        \"id\": 1,\n        \"name\": \"Proyek Riset Obat Tradisional Modern\",\n        \"status\": \"active\"\n      },\n      \"applicant\": {\n        \"id\": 3,\n        \"name\": \"John Doe\"\n      }\n    }\n  ],\n  \"links\": {\n    \"first\": \"http://localhost:8000/api/reviewer/applications?page=1\",\n    \"last\": \"http://localhost:8000/api/reviewer/applications?page=1\",\n    \"prev\": null,\n    \"next\": null\n  },\n  \"meta\": {\n    \"current_page\": 1,\n    \"last_page\": 1,\n    \"per_page\": 20,\n    \"total\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit Review Decision",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"approved\",\n  \"notes\": \"Dokumen lengkap dan dinyatakan lolos verifikasi.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/1/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "1",
+                "reviews"
+              ]
+            },
+            "description": "Mengirimkan keputusan penilaian review (approved, rejected, atau revision_requested)."
+          },
+          "response": [
+            {
+              "name": "Success Review Decision",
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Review berhasil diberikan.\",\n  \"data\": {\n    \"id\": 1,\n    \"application_id\": 1,\n    \"decision\": \"approved\",\n    \"decision_label\": \"Disetujui\",\n    \"notes\": \"Dokumen lengkap dan dinyatakan lolos verifikasi.\",\n    \"created_at\": \"2026-07-29T14:40:00.000000Z\"\n  },\n  \"application\": {\n    \"id\": 1,\n    \"status\": \"approved\",\n    \"status_label\": \"Disetujui\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "description": "Endpoint panel ringkasan (summary) informasi statis dan analitis.",
+      "item": [
+        {
+          "name": "Get Dashboard Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard"
+              ]
+            },
+            "description": "Mengambil data analitik dashboard (caching Redis 5 menit). Format data menyesuaikan secara dinamis berdasarkan role user."
+          },
+          "response": [
+            {
+              "name": "Success Applicant Dashboard Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"role\": \"applicant\",\n  \"summary\": {\n    \"total\": 1,\n    \"draft\": 0,\n    \"submitted\": 0,\n    \"under_review\": 0,\n    \"revision_requested\": 0,\n    \"approved\": 1,\n    \"rejected\": 0\n  },\n  \"chart_monthly\": [\n    {\n      \"month\": \"Jul 2026\",\n      \"total\": 1,\n      \"approved\": 1,\n      \"rejected\": 0\n    }\n  ],\n  \"recent_applications\": [\n    {\n      \"id\": 1,\n      \"application_number\": \"APP-2026-123456\",\n      \"status\": \"approved\",\n      \"status_label\": \"Disetujui\",\n      \"version\": 1,\n      \"notes\": \"Ubah catatan permohonan.\",\n      \"submitted_at\": \"2026-07-29T14:35:00.000000Z\",\n      \"approved_at\": \"2026-07-29T14:40:00.000000Z\",\n      \"rejected_at\": null,\n      \"created_at\": \"2026-07-29T14:30:00.000000Z\",\n      \"updated_at\": \"2026-07-29T14:40:00.000000Z\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "Success Reviewer Dashboard Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"role\": \"reviewer\",\n  \"summary\": {\n    \"total_incoming\": 1,\n    \"pending_review\": 0,\n    \"approved\": 1,\n    \"revision_requested\": 0,\n    \"rejected\": 0\n  },\n  \"chart_monthly\": [\n    {\n      \"month\": \"Jul 2026\",\n      \"approved\": 1,\n      \"rejected\": 0,\n      \"revision\": 0\n    }\n  ],\n  \"recent_applications\": []\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
