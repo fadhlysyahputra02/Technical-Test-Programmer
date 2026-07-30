@@ -25,7 +25,7 @@
       <svg class="h-10 w-10 text-purple-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
       </svg>
-      <p class="text-sm font-semibold text-white mb-1">Pilih file atau drag & drop di sini</p>
+      <p class="text-sm font-semibold text-white mb-1">Pilih file atau drag &amp; drop di sini</p>
       <p class="text-xs text-gray-400">
         Maksimal ukuran file: {{ maxSize }}MB. Format yang didukung: {{ accept }}
       </p>
@@ -38,29 +38,48 @@
         :key="file.id"
         class="border border-white/[0.08] rounded-lg p-4 bg-white/[0.02] flex items-center justify-between gap-4"
       >
-        <div class="flex items-center gap-3 overflow-hidden">
+        <div class="flex items-center gap-3 overflow-hidden flex-1">
           <svg class="h-8 w-8 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <div class="overflow-hidden">
+          <div class="overflow-hidden flex-1">
             <p class="text-sm text-white font-medium truncate">{{ file.name }}</p>
             <p class="text-xs text-gray-400">{{ formatSize(file.size) }}</p>
+            <!-- Real upload progress bar -->
+            <div v-if="file.status === 'uploading'" class="mt-1.5 w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+              <div
+                class="bg-purple-500 h-full transition-all duration-200"
+                :style="{ width: file.progress + '%' }"
+              ></div>
+            </div>
+            <p v-if="file.status === 'error'" class="text-xs text-red-400 mt-1">Gagal diunggah</p>
           </div>
         </div>
 
-        <!-- Progress or Action -->
+        <!-- Status icon / Remove -->
         <div class="flex items-center gap-3 shrink-0">
-          <div v-if="file.progress < 100" class="w-20 bg-white/10 rounded-full h-1.5 overflow-hidden">
-            <div class="bg-purple-500 h-full transition-all duration-300" :style="{ width: file.progress + '%' }"></div>
-          </div>
-          <span v-else class="text-xs text-emerald-400 flex items-center gap-1">
+          <!-- Uploading spinner -->
+          <svg v-if="file.status === 'uploading'" class="animate-spin h-4 w-4 text-purple-400" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <!-- Done checkmark -->
+          <span v-else-if="file.status === 'done'" class="text-xs text-emerald-400 flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
             Selesai
           </span>
+          <!-- Error icon -->
+          <span v-else-if="file.status === 'error'" class="text-xs text-red-400 flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Error
+          </span>
 
           <button
+            v-if="file.status !== 'uploading'"
             class="text-gray-400 hover:text-white transition-colors"
             @click.stop="removeFile(file.id)"
           >
@@ -90,10 +109,14 @@ const props = defineProps({
   multiple: {
     type: Boolean,
     default: false
+  },
+  uploadUrl: {
+    type: String,
+    required: true
   }
 })
 
-const emit = defineEmits(['upload'])
+const emit = defineEmits(['upload-complete', 'upload-error'])
 const { error } = useToast()
 
 const fileInput = ref(null)
@@ -106,6 +129,8 @@ const triggerFileInput = () => {
 
 const handleFileChange = (e) => {
   processFiles(e.target.files)
+  // Reset input so the same file can be re-selected after removal
+  e.target.value = ''
 }
 
 const handleDrop = (e) => {
@@ -116,7 +141,6 @@ const handleDrop = (e) => {
 const processFiles = (filesList) => {
   if (filesList.length === 0) return
 
-  const validFiles = []
   const maxBytes = props.maxSize * 1024 * 1024
 
   for (let i = 0; i < filesList.length; i++) {
@@ -133,33 +157,77 @@ const processFiles = (filesList) => {
       name: file.name,
       size: file.size,
       raw: file,
-      progress: 0
+      progress: 0,
+      status: 'uploading' // 'uploading' | 'done' | 'error'
     }
 
-    validFiles.push(fileObj)
-    if (!props.multiple) break // Stop if single mode
-  }
-
-  if (validFiles.length > 0) {
-    if (props.multiple) {
-      selectedFiles.value.push(...validFiles)
+    if (!props.multiple) {
+      selectedFiles.value = [fileObj]
     } else {
-      selectedFiles.value = validFiles
+      selectedFiles.value.push(fileObj)
     }
 
-    // Simulate upload progress animation
-    validFiles.forEach((file) => {
-      const interval = setInterval(() => {
-        if (file.progress >= 100) {
-          clearInterval(interval)
-          // Emit upload when progress reaches 100
-          emit('upload', props.multiple ? selectedFiles.value.map(f => f.raw) : [file.raw])
-        } else {
-          file.progress += 20
-        }
-      }, 100)
-    })
+    uploadFile(fileObj)
+
+    if (!props.multiple) break
   }
+}
+
+const uploadFile = (fileObj) => {
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token') || ''
+
+  const formData = new FormData()
+  formData.append('file', fileObj.raw)
+
+  const xhr = new XMLHttpRequest()
+
+  xhr.upload.addEventListener('progress', (e) => {
+    if (e.lengthComputable) {
+      const idx = selectedFiles.value.findIndex(f => f.id === fileObj.id)
+      if (idx !== -1) {
+        // Cap at 95% until server responds; last 5% fills on success
+        selectedFiles.value[idx].progress = Math.min(Math.round((e.loaded / e.total) * 95), 95)
+      }
+    }
+  })
+
+  xhr.addEventListener('load', () => {
+    const idx = selectedFiles.value.findIndex(f => f.id === fileObj.id)
+    if (xhr.status >= 200 && xhr.status < 300) {
+      if (idx !== -1) {
+        selectedFiles.value[idx].progress = 100
+        selectedFiles.value[idx].status = 'done'
+      }
+      try {
+        const data = JSON.parse(xhr.responseText)
+        emit('upload-complete', data)
+      } catch {
+        emit('upload-complete', null)
+      }
+    } else {
+      if (idx !== -1) {
+        selectedFiles.value[idx].status = 'error'
+      }
+      emit('upload-error', fileObj.name)
+      error(`Gagal mengunggah file "${fileObj.name}".`)
+    }
+  })
+
+  xhr.addEventListener('error', () => {
+    const idx = selectedFiles.value.findIndex(f => f.id === fileObj.id)
+    if (idx !== -1) {
+      selectedFiles.value[idx].status = 'error'
+    }
+    emit('upload-error', fileObj.name)
+    error(`Koneksi gagal saat mengunggah "${fileObj.name}".`)
+  })
+
+  xhr.open('POST', props.uploadUrl)
+  if (token) {
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+  }
+  xhr.setRequestHeader('Accept', 'application/json')
+  xhr.send(formData)
 }
 
 const removeFile = (id) => {

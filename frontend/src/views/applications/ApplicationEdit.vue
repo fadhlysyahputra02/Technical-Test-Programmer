@@ -63,7 +63,8 @@
                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                 :maxSize="10"
                 :multiple="true"
-                @upload="handleFileUpload"
+                :uploadUrl="`${apiBaseUrl}/api/applications/${applicationId}/documents`"
+                @upload-complete="handleFileUpload"
               />
             </div>
           </div>
@@ -159,6 +160,8 @@ import BaseButton from '../../components/BaseButton.vue'
 import ConfirmModal from '../../components/ConfirmModal.vue'
 import FileUploader from '../../components/FileUploader.vue'
 
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 const router = useRouter()
 const route = useRoute()
 const { success, error: toastError } = useToast()
@@ -206,22 +209,11 @@ const saveDraft = async () => {
   }
 }
 
-const handleFileUpload = async (files) => {
-  for (let i = 0; i < files.length; i++) {
-    const formData = new FormData()
-    formData.append('file', files[i])
-    
-    try {
-      await api.post(`/api/applications/${applicationId}/documents`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-    } catch (err) {
-      toastError(`Gagal mengunggah file ${files[i].name}.`)
-    }
-  }
-  
+const handleFileUpload = () => {
+  // Called by FileUploader after each file is successfully uploaded to the server.
+  // Refresh the document list so the newly uploaded file appears in "Dokumen Terlampir".
   success('Dokumen berhasil diunggah.')
-  fetchApplicationDetails() // Refresh doc list
+  fetchApplicationDetails()
 }
 
 const confirmDeleteDoc = (doc) => {
