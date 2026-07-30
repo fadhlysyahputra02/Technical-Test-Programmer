@@ -30,6 +30,22 @@ services:
     networks:
       - app-network
 
+  # Frontend Vue 3 / Vite Service
+  frontend:
+    image: node:20-alpine
+    container_name: laravel_frontend
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host"
+    depends_on:
+      - nginx
+    networks:
+      - app-network
+
   # PostgreSQL Database Service
   postgres:
     image: postgres:16-alpine
