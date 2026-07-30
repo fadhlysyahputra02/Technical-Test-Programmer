@@ -30,27 +30,55 @@ Sistem Persetujuan Dokumen berbasis web full-stack yang mengintegrasikan backend
 ### Opsi A: Menggunakan Docker Compose (Sangat Direkomendasikan)
 
 1. **Clone repository dan masuk ke folder proyek**
+
 2. **Jalankan container Docker**
+
    ```bash
    docker compose up -d --build
    ```
-3. **Migrasi database dan seeding data otomatis**
+
+3. **Install dependency backend Laravel**
+
+   ```bash
+   docker compose exec app composer install
+   ```
+
+4. **Buat dan konfigurasi file environment**
+
+   ```bash
+   docker compose exec app cp .env.example .env
+   ```
+
+   Jika file `.env` sudah tersedia, lewati langkah ini.
+
+5. **Generate application key Laravel**
+
+   ```bash
+   docker compose exec app php artisan key:generate
+   ```
+
+6. **Jalankan migrasi database dan seeding data**
+
    ```bash
    docker compose exec app php artisan migrate --seed
    ```
-4. **Jalankan Development Server Frontend**
+
+7. **Jalankan Development Server Frontend**
+
    ```bash
    cd frontend
    npm install
    npm run dev
    ```
+
    Aplikasi dapat diakses di:
-   * **Frontend:** [http://localhost:5173](http://localhost:5173)
-   * **Backend API:** [http://localhost:8000](http://localhost:8000)
-   * **pgAdmin 4 (Database UI):** [http://localhost:5050](http://localhost:5050) *(Email: admin@example.com / Pass: adminpassword)*
 
----
+   - **Frontend:** [http://localhost:5173](http://localhost:5173)
+   - **Backend API:** [http://localhost:8000](http://localhost:8000)
+   - **pgAdmin 4 (Database UI):** [http://localhost:5050](http://localhost:5050)  
+     *(Email: `admin@example.com` / Password: `adminpassword`)*
 
+     
 ### Opsi B: Instalasi Manual (Lokal Tanpa Docker)
 
 #### 1. Konfigurasi Backend
