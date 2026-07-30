@@ -54,6 +54,7 @@ docker compose up -d --build
 
 **3. Setup backend (hanya perlu dilakukan sekali)**
 ```bash
+docker compose exec app composer install
 docker compose exec app cp .env.example .env
 docker compose exec app php artisan key:generate
 docker compose exec app chmod -R 775 storage bootstrap/cache
@@ -90,7 +91,9 @@ Buka [http://localhost:5050](http://localhost:5050) → login dengan `admin@exam
 
 > ⚠️ Gunakan `postgres` sebagai host, bukan `localhost`.
 
----### Opsi B: Instalasi Manual (Lokal Tanpa Docker)
+---
+
+### Opsi B: Instalasi Manual (Lokal Tanpa Docker)
 
 #### 1. Konfigurasi Backend
 1. Masuk ke folder backend: `cd backend`
