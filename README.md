@@ -1,4 +1,6 @@
+Ini README yang sudah direvisi lengkap, tinggal copas:
 
+---
 
 [![Laravel](https://img.shields.io/badge/Laravel-13.x-red.svg?style=flat-square&logo=laravel)](https://laravel.com)
 [![Vue 3](https://img.shields.io/badge/Vue-3.x-emerald.svg?style=flat-square&logo=vue.js)](https://vuejs.org)
@@ -65,11 +67,21 @@ Sistem Persetujuan Dokumen berbasis web full-stack yang mengintegrasikan backend
 
 7. **Jalankan Development Server Frontend**
 
+   Pastikan **Node.js >= 18** dan **npm** sudah terinstal di perangkat Anda. Jika belum, unduh dan instal dari **[https://nodejs.org](https://nodejs.org)** sesuai OS Anda (Windows, macOS, Linux).
+
+   Kemudian jalankan frontend:
+
    ```bash
    cd frontend
    npm install
    npm run dev
    ```
+
+   > **Tidak ingin menginstal Node.js di perangkat lokal?** Jalankan frontend via Docker:
+   > ```bash
+   > cd frontend
+   > docker run --rm -it -v $(pwd):/app -w /app -p 5173:5173 node:20-alpine sh -c "npm install && npm run dev"
+   > ```
 
    Aplikasi dapat diakses di:
 
@@ -78,7 +90,24 @@ Sistem Persetujuan Dokumen berbasis web full-stack yang mengintegrasikan backend
    - **pgAdmin 4 (Database UI):** [http://localhost:5050](http://localhost:5050)  
      *(Email: `admin@example.com` / Password: `adminpassword`)*
 
-     
+### 🗄️ Menghubungkan pgAdmin ke Database
+
+Setelah container berjalan, buka [http://localhost:5050](http://localhost:5050) dan login dengan kredensial pgAdmin di atas. Kemudian tambahkan koneksi server database:
+
+1. Klik **Add New Server**
+2. Tab **General** → isi **Name** bebas, contoh: `Laravel DB`
+3. Tab **Connection**, isi:
+   - **Host:** `postgres`
+   - **Port:** `5432`
+   - **Database:** `laravel_db`
+   - **Username:** `laravel_user`
+   - **Password:** `laravel_password`
+4. Klik **Save**
+
+> ⚠️ Gunakan `postgres` sebagai host (bukan `localhost`), karena pgAdmin berjalan di dalam jaringan Docker.
+
+---
+
 ### Opsi B: Instalasi Manual (Lokal Tanpa Docker)
 
 #### 1. Konfigurasi Backend
@@ -113,7 +142,7 @@ Gunakan akun pra-konfigurasi berikut untuk menguji alur sistem:
 
 1. **Autentikasi Aman:** Token Sanctum terenkripsi di request header (`Authorization Bearer`).
 2. **Manajemen Proyek:** CRUD Proyek lengkap dengan proteksi otorisasi pemilik.
-3. **Pengelolaan Dokumen & Permohonan:** 
+3. **Pengelolaan Dokumen & Permohonan:**
    * Unggah multi-berkas dengan validasi ketat (max 10MB, PDF/Doc/Image).
    * Submit permohonan ber-versi (auto-generate nomor unik `APP-{YEAR}-{RANDOM}`).
    * Unduh file secara aman dengan token otorisasi via Axios Blob.
@@ -121,7 +150,7 @@ Gunakan akun pra-konfigurasi berikut untuk menguji alur sistem:
    * Antrean penilaian khusus untuk reviewer.
    * Transisi status atomik (DB Transaction) & riwayat linimasa (Timeline) terintegrasi.
    * Notifikasi penilaian otomatis ter-antrean (Queued Notification).
-5. **Dashboard Interaktif & Cache:** 
+5. **Dashboard Interaktif & Cache:**
    * Tampilan dashboard berbeda menyesuaikan peran aktif pemohon/penilai.
    * Caching statistik & grafik chart bulanan di Redis (TTL 5 menit) untuk meminimalkan beban database.
 6. **Query & Data Seeding Skala Besar:**
@@ -183,7 +212,6 @@ LionStyle/
          |                                                   | latest_reviewer_id (FK)      |
          +-------------------------------------------------* | notes                        |
          |                                                   +------------------------------+
-         |                                                                  |
          |                                                                  |
          |                    +-----------------------+                     |
          +------------------* | application_documents | <-------------------+
@@ -256,6 +284,7 @@ Semua endpoint dilindungi oleh header `Authorization: Bearer <token_akses>` kecu
 ## 🧪 Pengujian (Artisan Test)
 
 Untuk memverifikasi fungsionalitas workflow database, otorisasi role, dan transisi status permohonan secara otomatis:
+
 ```bash
 # Di dalam container app (Opsi A)
 docker compose exec app php artisan test
@@ -271,5 +300,5 @@ php artisan test
 
 1. Buka aplikasi **Postman**.
 2. Klik tombol **Import** di pojok kiri atas.
-3. Pilih berkas [postman_collection.json](file:///Applications/development/Laravel/Technical%20Test/postman_collection.json) dari direktori root proyek ini.
+3. Pilih berkas `postman_collection.json` dari direktori root proyek ini.
 4. Sesuaikan value variable `baseUrl` dan `token` pada tab Variables koleksi untuk mempermudah eksekusi kueri API.
