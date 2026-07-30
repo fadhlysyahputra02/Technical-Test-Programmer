@@ -97,25 +97,20 @@ Jika file `.env` sudah tersedia, lewati langkah ini.
 docker compose exec app php artisan key:generate
 ```
 
-**6. Publish konfigurasi Sanctum**
-```bash
-docker compose exec app php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
-```
-
-**7. Perbaiki permission folder storage**
+**6. Perbaiki permission folder storage**
 ```bash
 docker compose exec app chmod -R 775 storage bootstrap/cache
 docker compose exec app chown -R www-data:www-data storage bootstrap/cache
 ```
 
-**8. Jalankan migrasi database dan seeding data**
+**7. Jalankan migrasi database dan seeding data**
 ```bash
 docker compose exec app php artisan migrate --seed
 ```
 
 > Proses ini membutuhkan waktu beberapa menit karena seeder membuat ±22.000 data dummy.
 
-**9. Jalankan Development Server Frontend**
+**8. Jalankan Development Server Frontend**
 
 ```bash
 cd frontend
