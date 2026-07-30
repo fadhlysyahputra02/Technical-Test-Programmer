@@ -1,7 +1,3 @@
-Ini README yang sudah direvisi lengkap, tinggal copas:
-
----
-
 [![Laravel](https://img.shields.io/badge/Laravel-13.x-red.svg?style=flat-square&logo=laravel)](https://laravel.com)
 [![Vue 3](https://img.shields.io/badge/Vue-3.x-emerald.svg?style=flat-square&logo=vue.js)](https://vuejs.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.x-blue.svg?style=flat-square&logo=tailwind-css)](https://tailwindcss.com)
@@ -13,82 +9,139 @@ Sistem Persetujuan Dokumen berbasis web full-stack yang mengintegrasikan backend
 
 ---
 
-## 🛠️ Tech Stack & Requirements
+### Opsi A: Menggunakan Docker Compose (Sangat Direkomendasikan)
 
-### Tech Stack
-* **Backend:** Laravel 13, PHP 8.3+, Sanctum (Token Auth), Spatie Laravel Permission
-* **Frontend:** Vue 3, Vite, Vue Router 4, Pinia (State Management), Axios, Tailwind CSS v4, Chart.js
-* **Database & Cache:** PostgreSQL 16, Redis (alpine)
-* **DevOps:** Docker & Docker Compose
+#### 📋 Prasyarat — Install Docker Desktop
 
-### Persyaratan Sistem
-* Docker & Docker Compose (Direkomendasikan)
-* *Atau instalasi lokal (Manual):* PHP >= 8.3, Composer, Node.js >= 18, npm, PostgreSQL, Redis
+Docker Desktop adalah aplikasi yang wajib diinstal terlebih dahulu sebelum menjalankan proyek ini.
+
+**Windows:**
+1. Unduh Docker Desktop di **[https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)**
+2. Jalankan installer `.exe` dan ikuti petunjuknya
+3. Setelah selesai, buka aplikasi **Docker Desktop** dan tunggu hingga statusnya **"Engine running"** (ikon Docker di taskbar berwarna hijau)
+4. Pastikan fitur **WSL 2** diaktifkan saat diminta installer
+
+**macOS:**
+1. Unduh Docker Desktop di **[https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)**
+2. Pilih versi sesuai chip: **Apple Silicon (M1/M2/M3)** atau **Intel**
+3. Drag aplikasi Docker ke folder Applications, lalu buka
+4. Tunggu hingga ikon Docker di menu bar berwarna hijau
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt update
+sudo apt install -y ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+**Verifikasi Docker berhasil diinstal:**
+```bash
+docker --version
+docker compose version
+```
 
 ---
 
-## 🚀 Cara Menjalankan Aplikasi
+#### 📦 Prasyarat — Install Node.js
 
-### Opsi A: Menggunakan Docker Compose (Sangat Direkomendasikan)
+1. Unduh dari **[https://nodejs.org](https://nodejs.org)** → pilih versi **LTS**
+2. Jalankan installer sesuai OS dan ikuti petunjuknya
 
-1. **Clone repository dan masuk ke folder proyek**
+**Verifikasi:**
+```bash
+node --version
+npm --version
+```
 
-2. **Jalankan container Docker**
+---
 
-   ```bash
-   docker compose up -d --build
-   ```
+#### 🚀 Langkah Instalasi Proyek
 
-3. **Install dependency backend Laravel**
+**1. Clone repository dan masuk ke folder proyek**
+```bash
+git clone https://github.com/fadhlysyahputra02/Technical-Test-Programmer.git
+cd Technical-Test-Programmer
+```
 
-   ```bash
-   docker compose exec app composer install
-   ```
+> ⚠️ Pastikan Anda berada di folder root proyek (yang berisi file `docker-compose.yml`) sebelum menjalankan perintah berikutnya. Jangan masuk ke subfolder `backend/` atau `frontend/`.
 
-4. **Buat dan konfigurasi file environment**
+**2. Jalankan container Docker**
+```bash
+docker compose up -d --build
+```
 
-   ```bash
-   docker compose exec app cp .env.example .env
-   ```
+Tunggu hingga proses selesai. Cek semua container berstatus `Up`:
+```bash
+docker compose ps
+```
 
-   Jika file `.env` sudah tersedia, lewati langkah ini.
+**3. Install dependency backend Laravel**
+```bash
+docker compose exec app composer install
+```
 
-5. **Generate application key Laravel**
+**4. Buat dan konfigurasi file environment**
+```bash
+docker compose exec app cp .env.example .env
+```
+Jika file `.env` sudah tersedia, lewati langkah ini.
 
-   ```bash
-   docker compose exec app php artisan key:generate
-   ```
+**5. Generate application key Laravel**
+```bash
+docker compose exec app php artisan key:generate
+```
 
-6. **Jalankan migrasi database dan seeding data**
+**6. Publish konfigurasi Sanctum**
+```bash
+docker compose exec app php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+```
 
-   ```bash
-   docker compose exec app php artisan migrate --seed
-   ```
+**7. Perbaiki permission folder storage**
+```bash
+docker compose exec app chmod -R 775 storage bootstrap/cache
+docker compose exec app chown -R www-data:www-data storage bootstrap/cache
+```
 
-7. **Jalankan Development Server Frontend**
+**8. Jalankan migrasi database dan seeding data**
+```bash
+docker compose exec app php artisan migrate --seed
+```
 
-   Pastikan **Node.js >= 18** dan **npm** sudah terinstal di perangkat Anda. Jika belum, unduh dan instal dari **[https://nodejs.org](https://nodejs.org)** sesuai OS Anda (Windows, macOS, Linux).
+> Proses ini membutuhkan waktu beberapa menit karena seeder membuat ±22.000 data dummy.
 
-   Kemudian jalankan frontend:
+**9. Jalankan Development Server Frontend**
 
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-   > **Tidak ingin menginstal Node.js di perangkat lokal?** Jalankan frontend via Docker:
-   > ```bash
-   > cd frontend
-   > docker run --rm -it -v $(pwd):/app -w /app -p 5173:5173 node:20-alpine sh -c "npm install && npm run dev"
-   > ```
+> **Tidak ingin menginstal Node.js di perangkat lokal?** Jalankan frontend via Docker:
+> ```bash
+> cd frontend
+> docker run --rm -it -v $(pwd):/app -w /app -p 5173:5173 node:20-alpine sh -c "npm install && npm run dev"
+> ```
 
-   Aplikasi dapat diakses di:
+---
 
-   - **Frontend:** [http://localhost:5173](http://localhost:5173)
-   - **Backend API:** [http://localhost:8000](http://localhost:8000)
-   - **pgAdmin 4 (Database UI):** [http://localhost:5050](http://localhost:5050)  
-     *(Email: `admin@example.com` / Password: `adminpassword`)*
+#### 🌐 Akses Aplikasi
+
+Setelah semua langkah selesai, aplikasi dapat diakses di:
+
+| Layanan | URL |
+|---|---|
+| **Frontend** | [http://localhost:5173](http://localhost:5173) |
+| **Backend API** | [http://localhost:8000](http://localhost:8000) |
+| **pgAdmin 4** | [http://localhost:5050](http://localhost:5050) *(Email: `admin@example.com` / Password: `adminpassword`)* |
+
+---
 
 ### 🗄️ Menghubungkan pgAdmin ke Database
 
@@ -105,9 +158,6 @@ Setelah container berjalan, buka [http://localhost:5050](http://localhost:5050) 
 4. Klik **Save**
 
 > ⚠️ Gunakan `postgres` sebagai host (bukan `localhost`), karena pgAdmin berjalan di dalam jaringan Docker.
-
----
-
 ### Opsi B: Instalasi Manual (Lokal Tanpa Docker)
 
 #### 1. Konfigurasi Backend
