@@ -51,7 +51,8 @@ cd Technical-Test-Programmer
 docker compose up -d --build
 ```
 > Jika gagal, perlu buka aplikasi docker desktop dahulu
->Perintah ini menjalankan backend, frontend, database, redis, dan pgAdmin sekaligus. Tunggu hingga selesai (±2-5 menit pertama kali).
+> 
+> Perintah ini menjalankan backend, frontend, database, redis, dan pgAdmin sekaligus. Tunggu hingga selesai (±2-5 menit pertama kali).
 
 **3. Setup backend (hanya perlu dilakukan sekali)**
 ```bash
