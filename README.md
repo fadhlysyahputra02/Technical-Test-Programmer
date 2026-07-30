@@ -16,135 +16,71 @@ Sistem Persetujuan Dokumen berbasis web full-stack yang mengintegrasikan backend
 Docker Desktop adalah aplikasi yang wajib diinstal terlebih dahulu sebelum menjalankan proyek ini.
 
 **Windows:**
-1. Unduh Docker Desktop di **[https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)**
+1. Unduh di [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
 2. Jalankan installer `.exe` dan ikuti petunjuknya
-3. Setelah selesai, buka aplikasi **Docker Desktop** dan tunggu hingga statusnya **"Engine running"** (ikon Docker di taskbar berwarna hijau)
-4. Pastikan fitur **WSL 2** diaktifkan saat diminta installer
+3. Aktifkan fitur **WSL 2** saat diminta
+4. Buka aplikasi **Docker Desktop** dan tunggu hingga statusnya **"Engine running"**
 
 **macOS:**
-1. Unduh Docker Desktop di **[https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)**
-2. Pilih versi sesuai chip: **Apple Silicon (M1/M2/M3)** atau **Intel**
-3. Drag aplikasi Docker ke folder Applications, lalu buka
-4. Tunggu hingga ikon Docker di menu bar berwarna hijau
+1. Unduh di [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
+2. Pilih versi sesuai chip: **Apple Silicon** atau **Intel**
+3. Drag ke folder Applications, buka, tunggu ikon Docker di menu bar berwarna hijau
 
 **Linux (Ubuntu/Debian):**
 ```bash
-sudo apt update
-sudo apt install -y ca-certificates curl gnupg
+sudo apt update && sudo apt install -y ca-certificates curl gnupg
 sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-sudo usermod -aG docker $USER
-newgrp docker
-```
-
-**Verifikasi Docker berhasil diinstal:**
-```bash
-docker --version
-docker compose version
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo usermod -aG docker $USER && newgrp docker
 ```
 
 ---
 
-#### 📦 Prasyarat — Install Node.js
+### 🚀 Langkah Instalasi (Semua OS)
 
-1. Unduh dari **[https://nodejs.org](https://nodejs.org)** → pilih versi **LTS**
-2. Jalankan installer sesuai OS dan ikuti petunjuknya
-
-**Verifikasi:**
-```bash
-node --version
-npm --version
-```
-
----
-
-#### 🚀 Langkah Instalasi Proyek
-
-**1. Clone repository dan masuk ke folder proyek**
+**1. Clone repository**
 ```bash
 git clone https://github.com/fadhlysyahputra02/Technical-Test-Programmer.git
 cd Technical-Test-Programmer
 ```
 
-> ⚠️ Pastikan Anda berada di folder root proyek (yang berisi file `docker-compose.yml`) sebelum menjalankan perintah berikutnya. Jangan masuk ke subfolder `backend/` atau `frontend/`.
-
-**2. Jalankan container Docker**
+**2. Jalankan semua container**
 ```bash
 docker compose up -d --build
 ```
+> Perintah ini menjalankan backend, frontend, database, redis, dan pgAdmin sekaligus. Tunggu hingga selesai (±2-5 menit pertama kali).
 
-Tunggu hingga proses selesai. Cek semua container berstatus `Up`:
-```bash
-docker compose ps
-```
-
-**3. Install dependency backend Laravel**
-```bash
-docker compose exec app composer install
-```
-
-**4. Buat dan konfigurasi file environment**
+**3. Setup backend (hanya perlu dilakukan sekali)**
 ```bash
 docker compose exec app cp .env.example .env
-```
-Jika file `.env` sudah tersedia, lewati langkah ini.
-
-**5. Generate application key Laravel**
-```bash
 docker compose exec app php artisan key:generate
-```
-
-**6. Perbaiki permission folder storage**
-```bash
 docker compose exec app chmod -R 775 storage bootstrap/cache
 docker compose exec app chown -R www-data:www-data storage bootstrap/cache
+docker compose exec app php artisan migrate:fresh --seed
 ```
+> Proses seeding membutuhkan waktu beberapa menit karena membuat ±22.000 data dummy.
 
-**7. Jalankan migrasi database dan seeding data**
-```bash
-docker compose exec app php artisan migrate --seed
-```
-
-> Proses ini membutuhkan waktu beberapa menit karena seeder membuat ±22.000 data dummy.
-
-**8. Jalankan Development Server Frontend**
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-> **Tidak ingin menginstal Node.js di perangkat lokal?** Jalankan frontend via Docker:
-> ```bash
-> cd frontend
-> docker run --rm -it -v $(pwd):/app -w /app -p 5173:5173 node:20-alpine sh -c "npm install && npm run dev"
-> ```
-
----
-
-#### 🌐 Akses Aplikasi
-
-Setelah semua langkah selesai, aplikasi dapat diakses di:
+**4. Akses aplikasi**
 
 | Layanan | URL |
 |---|---|
 | **Frontend** | [http://localhost:5173](http://localhost:5173) |
 | **Backend API** | [http://localhost:8000](http://localhost:8000) |
-| **pgAdmin 4** | [http://localhost:5050](http://localhost:5050) *(Email: `admin@example.com` / Password: `adminpassword`)* |
+| **pgAdmin 4** | [http://localhost:5050](http://localhost:5050) |
+
+> Untuk menjalankan kembali di lain waktu, cukup: `docker compose up -d`
 
 ---
 
-### 🗄️ Menghubungkan pgAdmin ke Database
+## 🗄️ Menghubungkan pgAdmin ke Database
 
-Setelah container berjalan, buka [http://localhost:5050](http://localhost:5050) dan login dengan kredensial pgAdmin di atas. Kemudian tambahkan koneksi server database:
+Buka [http://localhost:5050](http://localhost:5050) → login dengan `admin@example.com` / `adminpassword`, lalu:
 
 1. Klik **Add New Server**
-2. Tab **General** → isi **Name** bebas, contoh: `Laravel DB`
-3. Tab **Connection**, isi:
+2. Tab **General** → **Name**: `Laravel DB`
+3. Tab **Connection**:
    - **Host:** `postgres`
    - **Port:** `5432`
    - **Database:** `laravel_db`
@@ -152,8 +88,9 @@ Setelah container berjalan, buka [http://localhost:5050](http://localhost:5050) 
    - **Password:** `laravel_password`
 4. Klik **Save**
 
-> ⚠️ Gunakan `postgres` sebagai host (bukan `localhost`), karena pgAdmin berjalan di dalam jaringan Docker.
-### Opsi B: Instalasi Manual (Lokal Tanpa Docker)
+> ⚠️ Gunakan `postgres` sebagai host, bukan `localhost`.
+
+---### Opsi B: Instalasi Manual (Lokal Tanpa Docker)
 
 #### 1. Konfigurasi Backend
 1. Masuk ke folder backend: `cd backend`
