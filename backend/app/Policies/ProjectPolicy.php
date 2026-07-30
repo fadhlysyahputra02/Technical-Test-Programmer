@@ -8,11 +8,11 @@ use App\Models\User;
 class ProjectPolicy
 {
     /**
-     * Only applicants can view their own project list.
+     * Applicants and reviewers can view the project list.
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('applicant');
+        return $user->hasRole('applicant') || $user->hasRole('reviewer');
     }
 
     /**

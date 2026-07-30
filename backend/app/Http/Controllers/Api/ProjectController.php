@@ -22,13 +22,18 @@ class ProjectController extends Controller
     {
         $this->authorize('viewAny', Project::class);
 
-        $projects = Project::select(['id', 'name', 'description', 'status', 'applicant_id', 'created_at', 'updated_at'])
-            ->withCount('applications')
-            ->where('applicant_id', $request->user()->id)
+        $query = Project::select(['id', 'name', 'description', 'status', 'applicant_id', 'created_at', 'updated_at'])
+            ->withCount('applications');
+
+        if ($request->user()->hasRole('applicant')) {
+            $query->where('applicant_id', $request->user()->id);
+        }
+
+        $projects = $query
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->when($request->filled('search'), fn ($q) => $q->where('name', 'ilike', '%' . $request->search . '%'))
             ->latest()
-            ->paginate(20);
+            ->paginate($request->integer('limit', 20));
 
         return ProjectResource::collection($projects);
     }
