@@ -20,7 +20,7 @@ class UserSeeder extends Seeder
         $demoApplicant = User::firstOrCreate(
             ['email' => 'applicant@demo.com'],
             [
-                'name'              => 'Demo Applicant',
+                'name'              => 'Budi Santoso',
                 'password'          => $demoPassword,
                 'email_verified_at' => $now,
                 'remember_token'    => Str::random(10),
@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
         $demoReviewer = User::firstOrCreate(
             ['email' => 'reviewer@demo.com'],
             [
-                'name'              => 'Demo Reviewer',
+                'name'              => 'Siti Rahmawati',
                 'password'          => $demoPassword,
                 'email_verified_at' => $now,
                 'remember_token'    => Str::random(10),
@@ -63,7 +63,7 @@ class UserSeeder extends Seeder
             $rows = [];
             for ($i = 0; $i < $count; $i++) {
                 $rows[] = [
-                    'name'              => fake()->name(),
+                    'name'              => fake('id_ID')->name(),
                     'email'             => "user_{$role}_{$batch}_{$i}_" . Str::random(6) . "@example.com",
                     'password'          => $password,
                     'email_verified_at' => $now,
